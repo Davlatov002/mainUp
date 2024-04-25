@@ -181,7 +181,8 @@ def get_identified_id(request, pk):
 @swagger_auto_schema(methods='GET')
 @api_view(['GET'])
 def get_tr_us(request, pk):
-    tr = Transaction.objects.filter(profile_id=pk)
+    profile = get_object_or_404(Profile, id=pk).username
+    tr = Transaction.objects.filter(username=profile)
     serialazer = UserTranzaktionserialazer(tr, many=True)
     return Response({'message': 1,"profile":serialazer.data}, status=status.HTTP_200_OK)
 
