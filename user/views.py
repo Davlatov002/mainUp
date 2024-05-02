@@ -285,9 +285,9 @@ def ad_reward(request, pk):
     taim2 = profile.last_mining
     taim1 = int(time.time())
     if taim2 + strength.taim <= taim1 :
-        if profile.number_people < 20:
+        if profile.number_people < strength.number_people1:
             nom = strength.netbo + (strength.level1 * profile.number_people)
-        elif profile.number_people < 50:
+        elif profile.number_people < strength.number_people2:
             nom = strength.netbo + (strength.level2 * profile.number_people)
         else:
             nom = strength.netbo + (strength.level3 * profile.number_people)
