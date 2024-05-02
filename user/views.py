@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from .models import Profile, Transaction, Identified, MoneyOut, Strength
 from drf_yasg.utils import swagger_auto_schema
-from .serialazers import ProfileSerializer, ProfilesingupSerialazer, ProfileLoginserialazer, UpdateProfileSerializer, ProfileRefeleshSerialazer,VerificationCodeserialazer ,GMProfileserialazer, UpdatePasswordSerializer, Tranzaktionserialazer, UpdateEmPsSerializer,UserTranzaktionserialazer, MoneyOutserialazer, CreatMoneyOutserialazer, IdentifiedSerializer
+from .serialazers import ProfileSerializer, ProfilesingupSerialazer, ProfileLoginserialazer, UpdateProfileSerializer, ProfileRefeleshSerialazer,VerificationCodeserialazer ,GMProfileserialazer, UpdatePasswordSerializer, Tranzaktionserialazer, UpdateEmPsSerializer,UserTranzaktionserialazer, MoneyOutserialazer, CreatMoneyOutserialazer, IdentifiedSerializer, StrengthSerialazer
 import time, calendar
 import random, string
 from datetime import datetime, timedelta
@@ -112,7 +112,10 @@ def send_otp(request, email):
 @swagger_auto_schema(method='PATCH', operation_description="O'chirmoqchi bo'lgan Profileni ID sini kirting")
 @api_view(['PATCH'])
 def verify_email(request, pk):
-    profile = get_object_or_404(Profile, id=pk)
+    try:
+        profile = Profile.objects.get(id=pk)
+    except:
+        return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
     is_data = int(time.time())
     profile.is_verified = is_data
     profile.save()
@@ -133,7 +136,10 @@ def verify_email(request, pk):
 def moneyout(request, pk):
     stf = get_object_or_404(Strength, id = 1).money_out
     if stf == True:
-        profile = get_object_or_404(Profile, id=pk)
+        try:
+            profile = Profile.objects.get(id=pk)
+        except:
+            return Response({'message': -1},status=status.HTTP_400_BAD_REQUEST)
         taim = int(time.time())
         wallet_address = request.data.get('wallet_addres')
         balance_netboo = request.data.get('balance_netbo')
@@ -162,7 +168,7 @@ def get_moneyout_id(request, pk):
 def upload_image(request, pk):
     serializer = IdentifiedSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    profile = get_object_or_404(Profile, id=pk)
+    profile = Profile.objects.get(id=pk)
     profile.is_identified = None
     profile.save()
     serializer.save(user_id=pk)
@@ -172,7 +178,7 @@ def upload_image(request, pk):
 @swagger_auto_schema(methods='GET')
 @api_view(['GET'])
 def get_identified_id(request, pk):
-    profile = get_object_or_404(Identified, id=pk)
+    profile = Identified.objects.get(id=pk)
     serializer = IdentifiedSerializer(profile)
     return Response({'message': 1,"Identified":serializer.data}, status=status.HTTP_200_OK)
 
@@ -181,7 +187,7 @@ def get_identified_id(request, pk):
 @swagger_auto_schema(methods='GET')
 @api_view(['GET'])
 def get_tr_us(request, pk):
-    profile = get_object_or_404(Profile, id=pk).username
+    profile = Profile.objects.get(id=pk).username
     tr = Transaction.objects.filter(username=profile)
     serialazer = UserTranzaktionserialazer(tr, many=True)
     return Response({'message': 1,"profile":serialazer.data}, status=status.HTTP_200_OK)
@@ -205,9 +211,9 @@ def balance_history(request, pk):
     moon_sum = [0] * days_in_month
     week_sum = [0] * 7
     profile = Profile.objects.get(id=pk)
-    username_id = profile.username
+    username_id = profile.id
 
-    all_transactions = Transaction.objects.filter(username=username_id)
+    all_transactions = Transaction.objects.filter(user=username_id)
 
     # Kunlik tranzaksiyalar
     daily_transactions = all_transactions.filter(
@@ -270,9 +276,12 @@ def update_password(request, email):
 @swagger_auto_schema(method='PATCH', operation_description="Ball berladigan profile ID sini kirting")
 @api_view(['PATCH'])
 def ad_reward(request, pk):
-    profile = get_object_or_404(Profile, id=pk)
-    strength = get_object_or_404(Strength, id = 1)
-    username_id = str(profile.username)
+    try:
+        profile = Profile.objects.get(id=pk)
+    except:
+        return Response({'message': -1},status=status.HTTP_400_BAD_REQUEST)
+    strength = Strength.objects.get(id = 1)
+    username_id = profile.id
     taim2 = profile.last_mining
     taim1 = int(time.time())
     if taim2 + strength.taim <= taim1 :
@@ -284,7 +293,7 @@ def ad_reward(request, pk):
             nom = strength.netbo + (strength.level3 * profile.number_people)
         profile.balance_netbo += nom
         profile.save()
-        data = {"username":username_id, 'balance_netbo':nom, "created_at":taim1}
+        data = {"user":username_id, 'balance_netbo':nom, "created_at":taim1}
 
         tran = Tranzaktionserialazer(data=data)
         profile.last_mining = int(time.time())
@@ -301,8 +310,14 @@ def ad_reward(request, pk):
 @api_view(['PATCH'])
 def activate_referral_link(request, pk):    
     referal = request.data.get('referal_link')
-    frend = get_object_or_404(Profile, referal_link=referal)
-    profile = get_object_or_404(Profile, id=pk)
+    try:
+        frend = Profile.objects.get(referal_link=referal)
+    except:
+        return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        profile = Profile.objects.get(id=pk)
+    except:
+        return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
     if frend.is_identified == True:
         link = frend.referal_link
         profile.friend_referal_link = link
@@ -334,7 +349,6 @@ def update_email_password(request, pk):
     serializer = ProfileSerializer(profile)
     return Response({'message': 1, "profile": serializer.data}, status=status.HTTP_200_OK)
     
-
 
 class UpdateProfileAPIView(generics.UpdateAPIView):
     serializer_class = UpdateProfileSerializer
@@ -381,7 +395,10 @@ def get_profile(request):
 def login(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    profile = get_object_or_404(Profile, username=username)    
+    try:
+        profile = Profile.objects.get(username=username)
+    except:
+        return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)   
     if profile.password == password:
         profile_serializer = ProfileSerializer(profile)
         return Response({'message': 1, "profile":profile_serializer.data}, status=status.HTTP_200_OK)
@@ -389,17 +406,29 @@ def login(request):
         return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
 
 
+    
 @swagger_auto_schema(method='POST', request_body=ProfilesingupSerialazer, operation_description="Malumotlarni kirting")
 @api_view(['POST'])
 def signup(request):
-    profiles = get_list_or_404(Profile)
     username = request.data.get('username')
     email = request.data.get('email')
-    if any(profile.username == username for profile in profiles):
+    # Profil ma'lumotlarini bir marta olish
+    existing_profiles = Profile.objects.filter(username=username) | Profile.objects.filter(email=email)
+    # Profil ma'lumotlarini tekshirish
+    if existing_profiles.exists():
         return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
-    elif any(profile.email == email for profile in profiles):
-        return Response({'message': -2}, status=status.HTTP_400_BAD_REQUEST)
-    serializer = ProfilesingupSerialazer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response({'message': 1, "profile": serializer.data}, status=status.HTTP_200_OK)
+    serializer = ProfileSerializer(data=request.data)
+    # Serializer ma'lumotlarini tekshirish
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 1, "profile": serializer.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({'message': -1}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@swagger_auto_schema(methods='GET')
+@api_view(['GET'])
+def get_strength(request):
+    strength = Strength.objects.get(id=1)
+    serializer = StrengthSerialazer(strength)
+    return Response({'message': 1,"strength":serializer.data}, status=status.HTTP_200_OK)

@@ -1,10 +1,13 @@
 from rest_framework import serializers
-from .models import Profile, Transaction, Identified, MoneyOut
+from .models import Profile, Transaction, Identified, MoneyOut, Strength
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+        extra_kwargs = {
+            'password': {'write_only': True}  # Parolni faqat yozish uchun qo'shimcha ma'lumot qilib belgilang
+        }
 
 class ProfilesingupSerialazer(serializers.ModelSerializer):
     class Meta:
@@ -14,7 +17,7 @@ class ProfilesingupSerialazer(serializers.ModelSerializer):
 class Tranzaktionserialazer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = ['username', 'balance_netbo', 'created_at']
+        fields = ['user', 'balance_netbo', 'created_at']
 
 class UserTranzaktionserialazer(serializers.ModelSerializer):
     class Meta:
@@ -82,3 +85,8 @@ class IdentifiedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Identified
         fields = fields = ["fullname", "birthday", "serial_document", "id_image", "address_image", "selfie_image"]
+
+class StrengthSerialazer(serializers.ModelSerializer):
+    class Meta:
+        model = Strength
+        fields = '__all__'

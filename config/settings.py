@@ -124,27 +124,27 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'gamedb',
-#         'USER': 'postgres',
-#         'PASSWORD': 'root123',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mainup',        # Ma'lumotlar bazasining nomi
-        'USER': 'postgres',            # Foydalanuvchi nomi
-        'PASSWORD': 'root1234',    # Foydalanuvchi paroli
-        'HOST': 'db',                # Ma'lumotlar bazasi serverining nomi (docker-compose faylida nomlangan)
-        'PORT': '5432',              # Ma'lumotlar bazasi porti
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'mainup',
+        'USER': 'postgres',
+        'PASSWORD': 'root123',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'mainup',        # Ma'lumotlar bazasining nomi
+#         'USER': 'postgres',            # Foydalanuvchi nomi
+#         'PASSWORD': 'root1234',    # Foydalanuvchi paroli
+#         'HOST': 'db',                # Ma'lumotlar bazasi serverining nomi (docker-compose faylida nomlangan)
+#         'PORT': '5432',              # Ma'lumotlar bazasi porti
+#     }
+# }
 
 
 # Password validation

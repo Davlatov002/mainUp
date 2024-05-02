@@ -28,12 +28,11 @@ class Profile(models.Model):
     
 
 class Transaction(models.Model):
-    username = models.CharField(max_length=200)
     balance_netbo = models.FloatField(default=0.0)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     created_at = models.IntegerField()
 
-    def __str__(self) -> str:
-        return self.username
+
 
 
 class Identified(models.Model):
@@ -55,12 +54,16 @@ class MoneyOut(models.Model):
     is_identified = models.BooleanField(null=True, blank=True)
     created_at = models.IntegerField()
 
+
+
    
 
 
 class Strength(models.Model):
     level1 = models.FloatField(default=0)
+    number_people1 = models.IntegerField(default=0)
     level2 = models.FloatField(default=0)
+    number_people2 = models.IntegerField(default=0)
     level3 = models.FloatField(default=0)
     netbo = models.FloatField(default=0)
     taim = models.IntegerField()

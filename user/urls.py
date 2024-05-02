@@ -28,6 +28,7 @@ urlpatterns = [
     path("get-moneyout-id/<str:pk>/", views.get_moneyout_id, name='get-moneyout-id'),
     path("moneyout/<str:pk>/", views.moneyout, name='moneyout'),
     path("recovery-password/<str:email>/", views.send_otp, name='recovery-password'),
+    path('get-strength/', views.get_strength, name='get-strength'),
 
 ]
 

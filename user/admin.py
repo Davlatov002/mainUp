@@ -2,14 +2,49 @@ from django.contrib import admin
 from .models import Identified, Profile, MoneyOut, Transaction, Strength
 from django.utils.html import format_html
 from datetime import datetime
+from django.contrib import messages
 import time
 from . import serialazers
+
+def make_identified(modeladmin, request, queryset):
+    for obj in queryset:
+        if obj.is_identified != True:
+            a = obj.user.id
+            profile = Profile.objects.get(id=a)
+            link = profile.friend_referal_link
+            profile.is_identified = True
+            obj.is_identified = True
+            obj.save()
+            profile.save()
+            if link != None:
+                profile.balance_netbo += 0.2
+                pr_username = profile.username
+                profile.save()
+                taim = int(time.time())
+                data = {"username":pr_username,'balance_netbo':0.2,"created_at":taim}
+                tran = serialazers.Tranzaktionserialazer(data=data)
+                if tran.is_valid():
+                    tran.save()
+
+                frend = Profile.objects.get(referal_link=link)
+                frend.number_people += 1
+                frend.balance_netbo += 0.1
+                fr_username = frend.username
+                data = {"username":fr_username,'balance_netbo':0.1,"created_at":taim}
+                frend.save()
+                tran = serialazers.Tranzaktionserialazer(data=data)
+                if tran.is_valid():
+                    tran.save()
+
+make_identified.short_description = "Mark selected as identified"
+
 
 class IdentifiedAdmin(admin.ModelAdmin):
     list_display = ('fullname','is_identified')
     search_fields = ('user__username',)
     list_filter = (('is_identified', admin.BooleanFieldListFilter), )
     readonly_fields = ('display_iD_image','display_address_image', 'display_selfie_image')
+    actions = [make_identified]
 
     def display_iD_image(self, obj):
         return format_html('<img src="{}" width="300" height="300" />'.format(obj.id_image.url))
@@ -76,16 +111,26 @@ class ModelOutAdmin(admin.ModelAdmin):
         return created_at_datetime.strftime("%Y-%m-%d %H:%M:%S")
     formatted_created_at.short_description = 'Created At'
 
+
+
+
+
+
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('username', 'is_identified', 'balance_netbo')
+    list_display = ('username', 'is_identified', 'balance_netbo', 'number_people')
     search_fields = ('username','email')
-    list_filter = (('is_identified', admin.BooleanFieldListFilter), )
+    list_filter = (('is_identified', admin.BooleanFieldListFilter),)
+    ordering = ('balance_netbo','number_people')
 
 
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('username', 'balance_netbo', 'formatted_created_at')
-    search_fields = ('username',)
+    list_display = ('user_username', 'balance_netbo', 'formatted_created_at')
+    search_fields = ('user__username',)
+
+    def user_username(self, obj):
+        return obj.user.username
+    user_username.short_description = 'User'
 
     def formatted_created_at(self, obj):
         # Avvalgi vaqt ma'lumotini datetime obyektiga o'zgartiramiz
