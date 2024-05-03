@@ -432,3 +432,30 @@ def get_strength(request):
     strength = Strength.objects.get(id=1)
     serializer = StrengthSerialazer(strength)
     return Response({'message': 1,"strength":serializer.data}, status=status.HTTP_200_OK)
+
+
+# @swagger_auto_schema(methods='GET')
+# @api_view(['GET'])
+# def loadjson(request):
+#     if request.method == 'GET':
+#         file_path = '/Users/davlatovbarot/Desktop/Projects/MNG/mainapp/profile_data12.json'
+#         with open(file_path, 'r') as f:
+#             data = json.load(f)
+#             for item in data:
+#                 email1 = item["fields"]["email"]
+#                 password1 = item["fields"]["password"]
+#                 username1 = item["fields"]["username"]
+#                 name1 = item["fields"]["name"]
+#                 surname1 = item["fields"]["surname"]
+#                 referal_link1 = item["fields"]["referal_link"]
+#                 number_people1 = item["fields"]["number_people"]
+#                 balance_netbo1 = item["fields"]["balance_netbo"]
+#                 wallet_id_netbo1 = item["fields"]["wallet_id_netbo"]
+#                 is_identified1 = item["fields"]["is_identified"]
+#                 is_verified1 = item["fields"]["is_verified"]
+#                 friend_referal_link1 = item["fields"]["friend_referal_link"]
+#                 profile = Profile(email=email1, password=password1, username=username1, name=name1, surname=surname1,referal_link=referal_link1, number_people=number_people1, balance_netbo=balance_netbo1, wallet_id_netbo=wallet_id_netbo1, is_identified=is_identified1,is_verified=is_verified1, friend_referal_link=friend_referal_link1)
+#                 profile.save()
+#             return Response({'message': 1}, status=status.HTTP_200_OK)
+#     else:
+#         return Response({'message': -1},status=status.HTTP_400_BAD_REQUEST)
